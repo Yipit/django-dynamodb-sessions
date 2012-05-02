@@ -96,6 +96,16 @@ The following settings may be used in your ``settings.py``:
 Changes
 -------
 
+0.5
+^^^
+
+* Replacing self.session_key with self._session_key in the backend. (AdamN)
+
+0.4
+^^^
+
+* Django 1.4 compatibility, and unnecessary code removal. (AdamN)
+
 0.3
 ^^^
 
