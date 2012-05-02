@@ -1,6 +1,8 @@
 import time
 import logging
 
+from functools import partial
+
 import boto
 from django.conf import settings
 from django.contrib.sessions.backends.base import SessionBase, CreateError
@@ -125,39 +127,33 @@ class SessionStore(SessionBase):
         :raises: ``CreateError`` if ``must_create`` is ``True`` and a session
             with the current session key already exists.
         """
+        
         # This base64 encodes session data.
         data = self.encode(self._get_session(no_load=must_create))
-
-        if must_create:
-            # Force the generation of a new session key.
+        
+        if not self._session_key:
             self._session_key = self._get_new_session_key()
+        
+        if not self.exists(self.session_key):
             logger.debug("  - Saving new session: %s" % self.session_key)
-            item = self.table.new_item(
-                self.session_key,
-                # Stuff the base64 encoded stuff into the 'data' attrib.
-                attrs={
-                    'data': data,
-                    # This will be used for session expiration.
-                    'created': int(time.time()),
-                }
-            )
-            try:
-                # We expect the 'data' attribute to not exist.
-                item.put(expected_value={'data': False})
-            except DynamoDBResponseError:
-                # There's already an item with this key.
-                raise CreateError
+            attrs = {
+                'data': data,
+                # This will be used for session expiration.
+                'created': int(time.time()),
+            }
+            save = self.table.new_item(self.session_key, attrs=atrrs)
+            func = partial(item.put, expected_value={'data': False})
         else:
             logger.debug("Saving existing session: %s" % self.session_key)
-            # This isn't really creating a new item, just a container for
-            # us to use put_attribute to queue an attrib update to.
             item = self.table.new_item(self.session_key)
-            # Queue up a PUT operation for UpdateItem, which preserves the
-            # existing 'created' attribute.
             item.put_attribute('data', data)
-            # Commits the PUT UpdateItem for the 'data' attrib, meanwhile
-            # leaving the 'created' attrib un-touched.
-            item.save()
+            save = partial(item.save)
+        try:
+            save()
+        except DynamoDBResponseError:
+            if must_create:
+                raise CreateError
+            raise
 
     def delete(self, session_key=None):
         """
