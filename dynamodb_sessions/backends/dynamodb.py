@@ -141,7 +141,7 @@ class SessionStore(SessionBase):
                 # This will be used for session expiration.
                 'created': int(time.time()),
             }
-            save = self.table.new_item(self.session_key, attrs=atrrs)
+            save = self.table.new_item(self.session_key, attrs=attrs)
             func = partial(item.put, expected_value={'data': False})
         else:
             logger.debug("Saving existing session: %s" % self.session_key)
