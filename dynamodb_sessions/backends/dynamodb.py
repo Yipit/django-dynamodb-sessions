@@ -141,13 +141,13 @@ class SessionStore(SessionBase):
                 # This will be used for session expiration.
                 'created': int(time.time()),
             }
-            save = self.table.new_item(self.session_key, attrs=attrs)
-            func = partial(item.put, expected_value={'data': False})
+            item = self.table.new_item(self.session_key, attrs=attrs)
+            save = partial(item.put, expected_value={'data': False})
         else:
             logger.debug("Saving existing session: %s" % self.session_key)
             item = self.table.new_item(self.session_key)
             item.put_attribute('data', data)
-            save = partial(item.save)
+            save = item.save
         try:
             save()
         except DynamoDBResponseError:
