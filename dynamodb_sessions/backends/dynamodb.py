@@ -1,3 +1,4 @@
+from hashlib import md5 as md5_constructor
 import time
 import logging
 
@@ -6,7 +7,6 @@ from functools import partial
 import boto
 from django.conf import settings
 from django.contrib.sessions.backends.base import SessionBase, CreateError
-from django.utils.hashcompat import md5_constructor
 from boto.dynamodb.exceptions import DynamoDBKeyNotFoundError
 from boto.exception import DynamoDBResponseError
 
