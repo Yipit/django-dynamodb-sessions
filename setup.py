@@ -7,7 +7,7 @@ major_ver, minor_ver = dynamodb_sessions.__version__
 version_str = '%d.%d' % (major_ver, minor_ver)
 
 setup(
-    name='django-dynamodb-sessions',
+    name='django-dynamodb-sessions-yipit',
     version=version_str,
     packages=find_packages(),
     description="A Django session backend using Amazon's DynamoDB",
