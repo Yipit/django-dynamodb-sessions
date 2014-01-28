@@ -78,7 +78,7 @@ class SessionStore(SessionBase):
         session_data = item['data']
         decoded_session_data = self.decode(session_data)
         if session_data and not decoded_session_data:
-            logger.error("Failed to decode session data %s", decoded_session_data)
+            logger.error("Failed to decode session data %s", session_data)
         return decoded_session_data
 
     def exists(self, session_key):
