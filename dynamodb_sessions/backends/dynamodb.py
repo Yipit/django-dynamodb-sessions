@@ -76,7 +76,10 @@ class SessionStore(SessionBase):
             return {}
 
         session_data = item['data']
-        return self.decode(session_data)
+        decoded_session_data = self.decode(session_data)
+        if session_data and not decoded_session_data:
+            logger.error("Failed to decode session data %s", decoded_session_data)
+        return decoded_session_data
 
     def exists(self, session_key):
         """
@@ -127,13 +130,13 @@ class SessionStore(SessionBase):
         :raises: ``CreateError`` if ``must_create`` is ``True`` and a session
             with the current session key already exists.
         """
-        
+
         # This base64 encodes session data.
         data = self.encode(self._get_session(no_load=must_create))
-        
+
         if not self._session_key:
             self._session_key = self._get_new_session_key()
-        
+
         if not self.exists(self.session_key):
             logger.debug("  - Saving new session: %s" % self.session_key)
             attrs = {
