@@ -50,14 +50,20 @@ def dynamodb_connection_factory():
         )
     return _DYNAMODB_CONN
 
+
 class SessionStore(SessionBase):
     """
     Implements DynamoDB session store.
     """
     def __init__(self, session_key=None):
         super(SessionStore, self).__init__(session_key)
-        self.table = dynamodb_connection_factory().get_table(TABLE_NAME)
+        self._table = None
 
+    @property
+    def table(self):
+        if self._table is None:
+            self._table = dynamodb_connection_factory().get_table(TABLE_NAME)
+        return self._table
 
     def load(self):
         """
